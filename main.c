@@ -1,89 +1,88 @@
 #include <stdio.h>
 
 int main(void) {
-    int so_don_hang = 0;
+    int total_orders = 0;
     
-    int so_don_thanh_cong = 0;
-    int so_don_loi = 0;
-    long long tong_doanh_thu = 0;
-    long long don_hang_max = 0;
+    int successful_orders = 0;
+    int failed_orders = 0;
+    long long total_revenue = 0;
+    long long max_order_value = 0;
 
-    printf("=== HE THONG POS - CHOT SO DOANH THU CA ===\n");
-    printf("Nhap tong so don hang trong ca: ");
-    if (scanf("%d", &so_don_hang) != 1) {
-        printf("Loi: Du lieu nhap vao khong hop le!\n");
+    printf("=== POS SYSTEM - SHIFT RECONCILIATION ===\n");
+    printf("Enter total number of orders in shift: ");
+    if (scanf("%d", &total_orders) != 1) {
+        printf("Error: Invalid input data!\n");
         return 0;
     }
 
-    for (int i = 1; i <= so_don_hang; i++) {
-        long long gia_co_so = 0;
-        char size_ky_tu = ' ';
-        int so_topping = 0;
-        int la_hoi_vien = 0;
+    for (int i = 1; i <= total_orders; i++) {
+        long long base_price = 0;
+        char size_char = ' ';
+        int topping_count = 0;
+        int is_gold_member = 0;
 
         printf("\n-----------------------------------\n");
-        printf(">>> NHAP THONG TIN DON HANG THU %d/%d <<<\n", i, so_don_hang);
+        printf(">>> ENTER ORDER DETAILS %d/%d <<<\n", i, total_orders);
         
-        printf("1. Nhap gia co so Size S (VND): ");
-        scanf("%lld", &gia_co_so);
+        printf("1. Enter base price for Size S (VND): ");
+        scanf("%lld", &base_price);
 
-        // THÊM KHOẢNG TRẮNG TRƯỚC %c Ở ĐÂY
-        printf("2. Nhap Size do uong (S, M, L): ");
-        scanf(" %c", &size_ky_tu);
+        printf("2. Enter beverage Size (S, M, L): ");
+        scanf(" %c", &size_char);
 
-        printf("3. Nhap so luong topping: ");
-        scanf("%d", &so_topping);
+        printf("3. Enter number of toppings: ");
+        scanf("%d", &topping_count);
 
-        printf("4. Hoi vien Vang? (1: Co, 0: Khong): ");
-        scanf("%d", &la_hoi_vien);
+        printf("4. Gold Member? (1: Yes, 0: No): ");
+        scanf("%d", &is_gold_member);
 
-        if (so_topping < 0) {
-            printf("\n[CANH BAO AN NINH] Phat hien so topping am (%d)! Can thiep trai phep hoac su co POS.\n", so_topping);
-            printf("[THONG BAO] NGAT KHAN CAP CA LAM VIEC! Dang xuat bao cao luy ke...\n");
+        if (topping_count < 0) {
+            printf("\n[SECURITY WARNING] Negative topping quantity detected (%d)! Unauthorized access or POS error.\n", topping_count);
+            printf("[NOTICE] EMERGENCY SHIFT SHUTDOWN! Generating accumulated report...\n");
             break;
         }
 
-        if (gia_co_so <= 0 || (size_ky_tu != 'S' && size_ky_tu != 's' &&
-                               size_ky_tu != 'M' && size_ky_tu != 'm' &&
-                               size_ky_tu != 'L' && size_ky_tu != 'l')) {
-            printf("\n[LOI DON RAC] Don hang thu %d co gia co so hoac Size khong hop le!\n", i);
-            printf("[HE THONG] Bo qua don hang nay va chuyen sang don tiep theo.\n");
-            so_don_loi++;
+        if (base_price <= 0 || (size_char != 'S' && size_char != 's' &&
+                                size_char != 'M' && size_char != 'm' &&
+                                size_char != 'L' && size_char != 'l')) {
+            printf("\n[INVALID ORDER] Order #%d has invalid base price or size!\n", i);
+            printf("[SYSTEM] Skipping this order and moving to the next one.\n");
+            failed_orders++;
             continue;
         }
 
-        long long phu_thu_size = 0;
-        if (size_ky_tu == 'M' || size_ky_tu == 'm') {
-            phu_thu_size = 6000;
-        } else if (size_ky_tu == 'L' || size_ky_tu == 'l') {
-            phu_thu_size = 10000;
+        long long size_surcharge = 0;
+        if (size_char == 'M' || size_char == 'm') {
+            size_surcharge = 6000;
+        } else if (size_char == 'L' || size_char == 'l') {
+            size_surcharge = 10000;
         }
 
-        long long phu_thu_topping = (long long)so_topping * 8000;
-        long long tong_truoc_giam = gia_co_so + phu_thu_size + phu_thu_topping;
-        long long tien_thanh_toan = tong_truoc_giam;
+        long long topping_surcharge = (long long)topping_count * 8000;
+        long long total_before_discount = base_price + size_surcharge + topping_surcharge;
+        long long final_payment = total_before_discount;
 
-        if (la_hoi_vien == 1) {
-            tien_thanh_toan = (long long)(tong_truoc_giam * 0.90);
+        if (is_gold_member == 1) {
+            final_payment = (long long)(total_before_discount * 0.90);
         }
 
-        so_don_thanh_cong++;
-        tong_doanh_thu += tien_thanh_toan;
+        successful_orders++;
+        total_revenue += final_payment;
 
-        if (tien_thanh_toan > don_hang_max) {
-            don_hang_max = tien_thanh_toan;
+        if (final_payment > max_order_value) {
+            max_order_value = final_payment;
         }
 
-        printf("-> Thanh toan thanh cong! So tien: %lld VND\n", tien_thanh_toan);
+        printf("-> Payment successful! Amount: %lld VND\n", final_payment);
     }
 
     printf("\n==================================================\n");
-    printf("       BAO CAO TONG HOP DOANH THU CA LAM VIEC     \n");
+    printf("         SHIFT REVENUE SUMMARY REPORT             \n");
     printf("==================================================\n");
-    printf("Tong so don hang hop le : %d don\n", so_don_thanh_cong);
-    printf("Tong so don hang loi/huy: %d don\n", so_don_loi);
-    printf("Tong doanh thu thuc te  : %lld VND\n", tong_doanh_thu);
-    printf("Don hang gia tri cao nhat: %lld VND\n", don_hang_max);
+    printf("Total valid orders     : %d\n", successful_orders);
+    printf("Total invalid/skipped  : %d\n", failed_orders);
+    printf("Total actual revenue   : %lld VND\n", total_revenue);
+    printf("Highest order value    : %lld VND\n", max_order_value);
     printf("==================================================\n");
 
     return 0;
